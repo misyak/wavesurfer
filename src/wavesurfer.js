@@ -3,6 +3,7 @@ import MultiCanvas from './drawer.multicanvas';
 import WebAudio from './webaudio';
 import MediaElement from './mediaelement';
 import PeakCache from './peakcache';
+import SpectrogramPlugin from './plugin/spectrogram.js';
 
 /*
  * This work is licensed under a BSD-3-Clause License.
@@ -223,7 +224,10 @@ export default class WaveSurfer extends util.Observer {
         skipLength: 2,
         splitChannels: false,
         waveColor: '#999',
-        xhr: {}
+        xhr: {},
+        // extra params
+        fftSamples: 512,
+        width: 800
     };
 
     /** @private */
@@ -1146,8 +1150,25 @@ export default class WaveSurfer extends util.Observer {
                 );
             }
         } else {
-            peaks = this.backend.getPeaks(width, start, end);
-            this.drawer.drawPeaks(peaks, width, start, end);
+            if (this.params.visualization === 'spectrogram') {
+                const params = {
+                    container: '.spectrogram-annotator',
+                    fftSamples: this.params.fftSamples,
+                    height: this.params.height,
+                    pixelRatio: this.params.pixelRatio,
+                    colorMap: this.params.colorMap,
+                    visualization: 'spectrogram'
+                };
+
+                this.sepectrogram = new SpectrogramPlugin(params, this);
+                this.sepectrogram.init();
+
+                // seting width
+                this.drawer.setWidth(width);
+            } else {
+                peaks = this.backend.getPeaks(width, start, end);
+                this.drawer.drawPeaks(peaks, width, start, end);
+            }
         }
         this.fireEvent('redraw', peaks, width);
     }

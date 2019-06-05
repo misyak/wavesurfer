@@ -25,9 +25,10 @@ class Region {
             params.resize === undefined ? true : Boolean(params.resize);
         this.drag = params.drag === undefined ? true : Boolean(params.drag);
         this.loop = Boolean(params.loop);
-        this.color = params.color || 'rgba(0, 0, 0, 0.1)';
+        this.color = params.color || 'rgba(0, 0, 0, 0.3)';
         this.data = params.data || {};
         this.attributes = params.attributes || {};
+        this.active = params.active === undefined ? true : params.resize;
 
         this.maxLength = params.maxLength;
         this.minLength = params.minLength;
@@ -75,6 +76,9 @@ class Region {
         }
         if (null != params.attributes) {
             this.attributes = params.attributes;
+        }
+        if (null != params.active) {
+            this.active = params.active;
         }
 
         this.updateRender();
@@ -210,6 +214,7 @@ class Region {
                 left: left + 'px',
                 width: regionWidth + 'px',
                 backgroundColor: this.color,
+                border: this.active ? '1px dashed white' : 'none',
                 cursor: this.drag ? 'move' : 'default'
             });
 
@@ -279,6 +284,9 @@ class Region {
             e.preventDefault();
             this.fireEvent('click', e);
             this.wavesurfer.fireEvent('region-click', this, e);
+            this.update({
+                active: !this.active
+            });
         });
 
         this.element.addEventListener('dblclick', e => {
@@ -389,6 +397,9 @@ class Region {
                         this.util.preventClick();
                         this.fireEvent('update-end', e);
                         this.wavesurfer.fireEvent('region-update-end', this, e);
+                        this.update({
+                            active: true
+                        });
                     }
                 };
                 const onMove = e => {
@@ -604,6 +615,10 @@ export default class RegionsPlugin {
                     return this.regions.add(options);
                 },
 
+                toggleActive(regionID) {
+                    this.regions.toogleActive(regionID);
+                },
+
                 clearRegions() {
                     this.regions && this.regions.clear();
                 },
@@ -695,6 +710,16 @@ export default class RegionsPlugin {
         });
 
         return region;
+    }
+
+    /**
+     * toggle active flag of region
+     * @param {string} regionID id of region
+     */
+    toogleActive(regionID) {
+        this.list[regionID].update({
+            active: false
+        });
     }
 
     /**

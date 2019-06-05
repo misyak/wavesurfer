@@ -101,8 +101,7 @@ export default class MultiCanvas extends Drawer {
                 width: '0',
                 display: 'none',
                 boxSizing: 'border-box',
-                borderRightStyle: 'solid',
-                pointerEvents: 'none'
+                borderRightStyle: 'solid'
             })
         );
 
@@ -171,8 +170,7 @@ export default class MultiCanvas extends Drawer {
                     left: leftOffset + 'px',
                     top: 0,
                     bottom: 0,
-                    height: '100%',
-                    pointerEvents: 'none'
+                    height: '100%'
                 })
             )
         );

@@ -235,6 +235,7 @@ const FFT = function(bufferSize, sampleRate, windowFunc, alpha) {
  * canvas. 2 = Draw on a quarter (1/2 the length and 1/2 the width)
  * @property {?boolean} deferInit Set to true to manually call
  * `initPlugin('spectrogram')`
+ * @property {number[][]} colorMap map of colors to make spectrogram colorful
  */
 
 /**
@@ -319,6 +320,7 @@ export default class SpectrogramPlugin {
             this.noverlap = params.noverlap;
             this.windowFunc = params.windowFunc;
             this.alpha = params.alpha;
+            this.colorMap = params.colorMap;
 
             this.createWrapper();
             this.createCanvas();
@@ -387,6 +389,7 @@ export default class SpectrogramPlugin {
         this.drawer.style(this.wrapper, {
             display: 'block',
             position: 'relative',
+            top: '-128px',
             userSelect: 'none',
             webkitUserSelect: 'none',
             height: `${this.height / this.pixelRatio}px`
@@ -394,8 +397,7 @@ export default class SpectrogramPlugin {
 
         if (wsParams.fillParent || wsParams.scrollParent) {
             this.drawer.style(this.wrapper, {
-                width: '100%',
-                overflowX: 'hidden',
+                overflowX: 'auto',
                 overflowY: 'hidden'
             });
         }
@@ -407,8 +409,12 @@ export default class SpectrogramPlugin {
     _wrapperClickHandler(event) {
         event.preventDefault();
 
-        const relX = 'offsetX' in event ? event.offsetX : event.layerX;
-        this.fireEvent('click', relX / this.scrollWidth || 0);
+        if (this.params.visualization === 'spectrogram') {
+            return;
+        } else {
+            const relX = 'offsetX' in event ? event.offsetX : event.layerX;
+            this.fireEvent('click', relX / this.scrollWidth || 0);
+        }
     }
 
     createCanvas() {
@@ -419,8 +425,8 @@ export default class SpectrogramPlugin {
         this.spectrCc = canvas.getContext('2d');
 
         this.util.style(canvas, {
-            position: 'absolute',
-            zIndex: 4
+            position: 'relative',
+            zIndex: 0
         });
     }
 
@@ -452,15 +458,9 @@ export default class SpectrogramPlugin {
 
         for (i = 0; i < pixels.length; i++) {
             for (j = 0; j < pixels[i].length; j++) {
-                const colorValue = 255 - pixels[i][j];
-                my.spectrCc.fillStyle =
-                    'rgb(' +
-                    colorValue +
-                    ', ' +
-                    colorValue +
-                    ', ' +
-                    colorValue +
-                    ')';
+                const rgb = my.colorMap[pixels[i][j]];
+
+                my.spectrCc.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
                 my.spectrCc.fillRect(
                     i,
                     height - j * heightFactor,
