@@ -95,7 +95,6 @@
     "webpack-merge": "^4.2.1"
   },
   "homepage": "https://github.com/misyak/wavesurfer",
-  "pre-commit": "lint-and-format-staged",
   "lint-staged": {
     "*.js": [
       "prettier",
